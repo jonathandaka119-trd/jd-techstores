@@ -4,9 +4,11 @@ import { Heart, ShoppingCart, Star, ChevronRight, Truck, Shield, RotateCcw, Shar
 import { supabase } from '../lib/supabase'
 import { StarRating, PriceDisplay, StockIndicator, QuantitySelector, Spinner, toast } from '../components/ui'
 import ProductCard from '../components/ProductCard'
+import RecentlyViewed from '../components/RecentlyViewed'
 import { useCart } from '../hooks/useCart'
 import { useAuth } from '../hooks/useAuth'
 import { useWishlistStore } from '../store'
+import { useStore } from '../store/useStore'
 import type { Product, ProductSpecification, Review } from '../lib/supabase'
 
 export default function ProductDetailPage() {
@@ -14,6 +16,7 @@ export default function ProductDetailPage() {
   const { user } = useAuth()
   const { addToCart, formatPrice } = useCart()
   const { hasId, addId, removeId } = useWishlistStore()
+  const { addToRecentlyViewed } = useStore()
   const navigate = useNavigate()
 
   const [product, setProduct] = useState<Product | null>(null)
@@ -55,6 +58,7 @@ export default function ProductDetailPage() {
 
       setProduct(prod as Product)
       setActiveImg(prod.main_image_url || '')
+      addToRecentlyViewed(prod as any)
 
       const jsonSpecs = (rawProd as any).specifications
       if (jsonSpecs && typeof jsonSpecs === 'object' && !Array.isArray(jsonSpecs)) {
@@ -426,6 +430,8 @@ export default function ProductDetailPage() {
             </div>
           </div>
         )}
+
+        <RecentlyViewed excludeId={product?.id} />
       </div>
     </div>
   )

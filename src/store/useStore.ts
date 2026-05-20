@@ -5,7 +5,7 @@ import { Product, Profile, CartItemLocal } from '../types'
 interface StoreState {
   user: Profile | null
   setUser: (user: Profile | null) => void
-  
+
   cartItems: CartItemLocal[]
   addToCart: (product: Product, quantity?: number) => void
   removeFromCart: (productId: string) => void
@@ -13,18 +13,26 @@ interface StoreState {
   clearCart: () => void
   cartTotal: () => number
   cartCount: () => number
-  
+
   wishlistIds: string[]
   toggleWishlist: (productId: string) => void
   isInWishlist: (productId: string) => boolean
-  
+
   isCartOpen: boolean
   setCartOpen: (open: boolean) => void
   searchQuery: string
   setSearchQuery: (query: string) => void
-  
+
   appliedCoupon: { code: string; discount: number } | null
   setAppliedCoupon: (coupon: { code: string; discount: number } | null) => void
+
+  recentlyViewed: Product[]
+  addToRecentlyViewed: (product: Product) => void
+
+  compareList: Product[]
+  toggleCompare: (product: Product) => void
+  isInCompare: (productId: string) => boolean
+  clearCompare: () => void
 }
 
 export const useStore = create<StoreState>()(
@@ -32,7 +40,7 @@ export const useStore = create<StoreState>()(
     (set, get) => ({
       user: null,
       setUser: (user) => set({ user }),
-      
+
       cartItems: [],
       addToCart: (product, quantity = 1) => {
         const existing = get().cartItems.find(i => i.product.id === product.id)
@@ -60,7 +68,7 @@ export const useStore = create<StoreState>()(
       clearCart: () => set({ cartItems: [] }),
       cartTotal: () => get().cartItems.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
       cartCount: () => get().cartItems.reduce((sum, i) => sum + i.quantity, 0),
-      
+
       wishlistIds: [],
       toggleWishlist: (productId) => {
         const ids = get().wishlistIds
@@ -71,14 +79,32 @@ export const useStore = create<StoreState>()(
         }
       },
       isInWishlist: (productId) => get().wishlistIds.includes(productId),
-      
+
       isCartOpen: false,
       setCartOpen: (open) => set({ isCartOpen: open }),
       searchQuery: '',
       setSearchQuery: (query) => set({ searchQuery: query }),
-      
+
       appliedCoupon: null,
       setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
+
+      recentlyViewed: [],
+      addToRecentlyViewed: (product) => {
+        const filtered = get().recentlyViewed.filter(p => p.id !== product.id)
+        set({ recentlyViewed: [product, ...filtered].slice(0, 6) })
+      },
+
+      compareList: [],
+      toggleCompare: (product) => {
+        const list = get().compareList
+        if (list.find(p => p.id === product.id)) {
+          set({ compareList: list.filter(p => p.id !== product.id) })
+        } else if (list.length < 3) {
+          set({ compareList: [...list, product] })
+        }
+      },
+      isInCompare: (productId) => get().compareList.some(p => p.id === productId),
+      clearCompare: () => set({ compareList: [] }),
     }),
     {
       name: 'jd-techstores',
@@ -86,6 +112,7 @@ export const useStore = create<StoreState>()(
         cartItems: state.cartItems,
         wishlistIds: state.wishlistIds,
         user: state.user,
+        recentlyViewed: state.recentlyViewed,
       }),
     }
   )

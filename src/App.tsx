@@ -11,6 +11,7 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from './pages/AuthPages'
 import { CartPage, CheckoutPage, OrderConfirmationPage } from './pages/CartCheckoutPages'
 import { ShippingPage, ReturnsPage, PrivacyPage, TermsPage } from './pages/PolicyPages'
 import { StorekeeperDashboard } from './pages/StorekeeperPages'
+import CompareBar from './components/CompareBar'
 
 const HomePage          = lazy(() => import('./pages/HomePage'))
 const ProductsPage      = lazy(() => import('./pages/ProductsPage'))
@@ -23,6 +24,7 @@ const FAQPage           = lazy(() => import('./pages/FAQPage'))
 const DashboardPage     = lazy(() => import('./pages/DashboardPage'))
 const WishlistPage      = lazy(() => import('./pages/WishlistPage'))
 const AdminDashboard    = lazy(() => import('./pages/AdminDashboard'))
+const ComparePage       = lazy(() => import('./pages/ComparePage'))
 
 function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: 'admin' | 'storekeeper' }) {
   const { user, isLoading } = useAuth()
@@ -44,6 +46,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <CartDrawer />
       <main className="flex-1 page-enter">{children}</main>
       <Footer />
+      <CompareBar />
     </div>
   )
 }
@@ -90,6 +93,7 @@ export default function App() {
             <Route path="/order-confirmation/:orderId" element={<ProtectedRoute><Layout><OrderConfirmationPage /></Layout></ProtectedRoute>} />
             <Route path="/dashboard/*" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
             <Route path="/wishlist"   element={<ProtectedRoute><Layout><WishlistPage /></Layout></ProtectedRoute>} />
+            <Route path="/compare"    element={<Layout><ComparePage /></Layout>} />
             <Route path="/admin/*"    element={<ProtectedRoute requiredRole="admin"><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
             <Route path="/storekeeper/*" element={<ProtectedRoute requiredRole="storekeeper"><AdminLayout><StorekeeperDashboard /></AdminLayout></ProtectedRoute>} />
             <Route path="*"           element={<Navigate to="/" replace />} />

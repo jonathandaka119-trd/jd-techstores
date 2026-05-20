@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, ShoppingCart, Star } from 'lucide-react'
+import { Heart, ShoppingCart, Star, GitCompare } from 'lucide-react'
 import { Product } from '../../types'
 import { useStore } from '../../store/useStore'
 import { formatPrice, getDiscount } from '../../lib/mockData'
@@ -11,8 +11,10 @@ interface Props {
 }
 
 export default function ProductCard({ product, className = '' }: Props) {
-  const { addToCart, toggleWishlist, isInWishlist, setCartOpen } = useStore()
+  const { addToCart, toggleWishlist, isInWishlist, setCartOpen, toggleCompare, isInCompare, compareList } = useStore()
   const inWishlist = isInWishlist(product.id)
+  const inCompare = isInCompare(product.id)
+  const compareFull = compareList.length >= 3 && !inCompare
   const discount = product.original_price ? getDiscount(product.price, product.original_price) : 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -29,6 +31,13 @@ export default function ProductCard({ product, className = '' }: Props) {
     toast.success(inWishlist ? 'Removed from wishlist' : 'Added to wishlist')
   }
 
+  const handleCompare = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (compareFull) { toast.error('Max 3 products to compare'); return }
+    toggleCompare(product)
+    toast.success(inCompare ? 'Removed from comparison' : 'Added to comparison')
+  }
+
   return (
     <Link to={`/product/${product.slug}`} className={`block group card-hover bg-dark-800 border border-gray-800 hover:border-primary-500/40 rounded-2xl overflow-hidden ${className}`}>
       <div className="relative aspect-square overflow-hidden bg-dark-700">
@@ -41,6 +50,9 @@ export default function ProductCard({ product, className = '' }: Props) {
         <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button onClick={handleWishlist} className={`w-8 h-8 rounded-lg glass flex items-center justify-center ${inWishlist ? 'text-primary-500' : 'text-gray-300 hover:text-primary-500'}`}>
             <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+          </button>
+          <button onClick={handleCompare} disabled={compareFull} className={`w-8 h-8 rounded-lg glass flex items-center justify-center transition-colors ${inCompare ? 'text-primary-500' : 'text-gray-300 hover:text-primary-500'} disabled:opacity-40 disabled:cursor-not-allowed`}>
+            <GitCompare className="w-4 h-4" />
           </button>
         </div>
       </div>
